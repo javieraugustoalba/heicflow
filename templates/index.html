@@ -1,0 +1,326 @@
+{% extends "base.html" %}
+{% set title = "Convert HEIC to " ~ (default_format|upper) ~ " Online Free" %}
+
+{% block content %}
+  <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2">
+      <div class="inline-flex rounded-full border border-indigo-300/20 bg-indigo-400/10 px-3 py-1 text-xs text-indigo-100">
+        Free standard conversion • Pro high-quality conversion
+      </div>
+      <h1 class="mt-4 text-3xl sm:text-5xl font-bold tracking-tight">
+        Convert HEIC to JPG, PNG or WEBP online
+      </h1>
+      <p class="mt-4 text-white/72 text-base sm:text-lg leading-7">
+        Convert iPhone HEIC/HEIF photos directly in your browser workflow. Use free standard quality with ads, or upgrade later for high-quality batches, ZIP downloads and no ads.
+      </p>
+
+      {% if adsense_client and adsense_slot_top %}
+        <div class="mt-6 rounded-2xl border border-white/10 bg-white/5 p-3 text-center">
+          <ins class="adsbygoogle" style="display:block" data-ad-client="{{ adsense_client }}" data-ad-slot="{{ adsense_slot_top }}" data-ad-format="auto" data-full-width-responsive="true"></ins>
+          <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        </div>
+      {% endif %}
+
+      <div class="mt-6 rounded-2xl bg-white/5 backdrop-blur border border-white/10 shadow-xl p-5 sm:p-7">
+        <form id="form" class="space-y-5">
+          <div>
+            <label class="block text-sm font-medium text-white/80 mb-2">Files</label>
+
+            <div id="dropzone"
+              class="group relative flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-white/20 bg-white/5 px-4 py-10 text-center hover:bg-white/10 transition"
+            >
+              <input id="file" name="files" type="file" class="hidden"
+                multiple
+                accept=".heic,.heif,image/heic,image/heif" />
+
+              <div class="text-base sm:text-lg font-semibold">
+                Drag & drop HEIC/HEIF files here
+              </div>
+              <div class="text-sm text-white/70">
+                or click to choose. Max {{ max_files }} files per batch.
+              </div>
+
+              <div id="filename" class="mt-3 text-sm text-white/80 hidden"></div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-white/80 mb-2">Convert to</label>
+              <select name="format" id="format"
+                class="w-full rounded-xl bg-slate-950/60 border border-white/10 px-4 py-3 outline-none focus:ring-2 focus:ring-indigo-400"
+              >
+                <option value="jpg" {% if default_format == 'jpg' %}selected{% endif %}>JPG</option>
+                <option value="png" {% if default_format == 'png' %}selected{% endif %}>PNG</option>
+                <option value="webp" {% if default_format == 'webp' %}selected{% endif %}>WEBP</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-white/80 mb-2">Quality</label>
+              <select name="quality" id="quality"
+                class="w-full rounded-xl bg-slate-950/60 border border-white/10 px-4 py-3 outline-none focus:ring-2 focus:ring-indigo-400"
+              >
+                <option value="standard">Standard — Free</option>
+                <option value="high" {% if not is_paid %}disabled{% endif %}>High — Pro</option>
+                <option value="max" {% if not is_paid %}disabled{% endif %}>Maximum — Pro</option>
+              </select>
+            </div>
+
+            <div class="flex items-end">
+              <button id="convertBtn" type="submit"
+                class="w-full rounded-xl bg-indigo-500 hover:bg-indigo-400 active:bg-indigo-600 transition px-4 py-3 font-semibold shadow-lg shadow-indigo-500/20"
+              >
+                Convert now
+              </button>
+            </div>
+          </div>
+
+          <div class="rounded-xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-50">
+            Free users get standard quality. Pro unlocks high/maximum quality, larger batches and no ads. Free quality stays useful; Pro is for professional batches and better control.
+          </div>
+
+          <div id="toast" class="hidden rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/80"></div>
+        </form>
+      </div>
+
+      <div id="afterConvertAd" class="hidden mt-6 rounded-2xl border border-white/10 bg-white/5 p-3 text-center">
+        {% if adsense_client and adsense_slot_after_convert %}
+          <ins class="adsbygoogle" style="display:block" data-ad-client="{{ adsense_client }}" data-ad-slot="{{ adsense_slot_after_convert }}" data-ad-format="auto" data-full-width-responsive="true"></ins>
+        {% else %}
+          <div class="text-sm text-white/60">Ad space — configure ADSENSE_CLIENT and ADSENSE_SLOT_AFTER_CONVERT after AdSense approval.</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <aside class="lg:col-span-1 space-y-5">
+      <div class="rounded-2xl border border-white/10 bg-white/5 p-5">
+        <div class="flex items-center gap-3">
+          {% if user and user.is_authenticated and user.picture_url %}
+            <img src="{{ user.picture_url }}" alt="profile" class="h-10 w-10 rounded-full border border-white/10" />
+          {% endif %}
+          <div>
+            <div class="font-semibold">
+              {% if user and user.is_authenticated %}
+                {{ user.name or user.email }}
+              {% else %}
+                Guest visitor
+              {% endif %}
+            </div>
+            <div class="text-sm text-white/60">
+              {% if entitlement %}
+                Plan: {{ entitlement.plan_name }}
+              {% else %}
+                Free daily guest limit
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        {% if entitlement and usage %}
+          <div class="mt-4">
+            <div class="flex items-center justify-between text-sm text-white/70">
+              <span>Credits this period</span>
+              <span class="font-semibold text-white">{{ usage.used }} / {{ usage.quota }}</span>
+            </div>
+            <div class="mt-2 h-2 rounded-full bg-white/10 overflow-hidden">
+              {% set pct = (usage.used / usage.quota * 100) if usage.quota else 0 %}
+              <div class="h-2 bg-indigo-400" style="width: {{ pct }}%"></div>
+            </div>
+            <div class="mt-3 text-xs text-white/55">
+              Period: {{ entitlement.period_start.strftime("%Y-%m-%d") }} → {{ entitlement.period_end.strftime("%Y-%m-%d") }}
+            </div>
+            {% if not entitlement.is_paid %}
+              <a href="/pricing" class="inline-flex mt-4 w-full justify-center rounded-xl bg-white/10 hover:bg-white/15 px-4 py-3 font-semibold">
+                Upgrade to Pro
+              </a>
+            {% endif %}
+          </div>
+        {% else %}
+          <div class="mt-4 text-sm text-white/70 space-y-2">
+            <p>Guest limit: {{ guest_daily_files }} files/day and {{ guest_daily_mb }} MB/day.</p>
+            <p>Create a free account for more monthly conversions.</p>
+          </div>
+          <a href="/login" class="inline-flex mt-4 w-full justify-center rounded-xl bg-white/10 hover:bg-white/15 px-4 py-3 font-semibold">
+            Create free account
+          </a>
+        {% endif %}
+      </div>
+
+      <div class="rounded-2xl border border-white/10 bg-white/5 p-5">
+        <h2 class="font-semibold">Why use this converter?</h2>
+        <ul class="mt-3 space-y-2 text-sm text-white/70">
+          <li>• HEIC/HEIF to JPG, PNG or WEBP</li>
+          <li>• Standard quality free with ads</li>
+          <li>• High quality for Pro users</li>
+          <li>• ZIP download for multiple files</li>
+          <li>• No installation required</li>
+        </ul>
+      </div>
+    </aside>
+  </section>
+
+  <section class="mt-12 grid gap-6 md:grid-cols-3">
+    <div class="rounded-2xl border border-white/10 bg-white/5 p-5">
+      <h2 class="font-semibold">HEIC to JPG</h2>
+      <p class="mt-2 text-sm text-white/70">Best for compatibility with websites, forms, email and older systems.</p>
+      <a href="/heic-to-jpg" class="mt-4 inline-flex text-sm text-indigo-200 hover:text-white">Open JPG converter →</a>
+    </div>
+    <div class="rounded-2xl border border-white/10 bg-white/5 p-5">
+      <h2 class="font-semibold">HEIC to PNG</h2>
+      <p class="mt-2 text-sm text-white/70">Good for screenshots, graphics and lossless workflows.</p>
+      <a href="/heic-to-png" class="mt-4 inline-flex text-sm text-indigo-200 hover:text-white">Open PNG converter →</a>
+    </div>
+    <div class="rounded-2xl border border-white/10 bg-white/5 p-5">
+      <h2 class="font-semibold">HEIC to WEBP</h2>
+      <p class="mt-2 text-sm text-white/70">Modern format for smaller files and web publishing.</p>
+      <a href="/heic-to-webp" class="mt-4 inline-flex text-sm text-indigo-200 hover:text-white">Open WEBP converter →</a>
+    </div>
+  </section>
+
+  <section class="mt-12 rounded-2xl border border-white/10 bg-white/5 p-6">
+    <h2 class="text-2xl font-bold">Frequently asked questions</h2>
+    <div class="mt-5 grid gap-5 md:grid-cols-2 text-sm text-white/72 leading-6">
+      <div>
+        <h3 class="font-semibold text-white">What is HEIC?</h3>
+        <p class="mt-1">HEIC is a modern image format commonly used by iPhones. It saves space, but some websites and systems still require JPG or PNG.</p>
+      </div>
+      <div>
+        <h3 class="font-semibold text-white">Is free conversion lower quality?</h3>
+        <p class="mt-1">Free standard quality is designed for everyday use. Pro high/maximum quality gives more control for professional batches and important deliveries.</p>
+      </div>
+      <div>
+        <h3 class="font-semibold text-white">Do you store my images?</h3>
+        <p class="mt-1">Files are processed temporarily for conversion. This service is designed not to intentionally store uploaded images after the download is generated.</p>
+      </div>
+      <div>
+        <h3 class="font-semibold text-white">Why are there limits?</h3>
+        <p class="mt-1">Limits keep the free converter fast and protect the service from abuse. Larger batches and high quality are available in Pro plans.</p>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const dropzone = document.getElementById("dropzone");
+    const fileInput = document.getElementById("file");
+    const filenameEl = document.getElementById("filename");
+    const form = document.getElementById("form");
+    const btn = document.getElementById("convertBtn");
+    const toast = document.getElementById("toast");
+    const afterConvertAd = document.getElementById("afterConvertAd");
+    const MAX_FILES = {{ max_files }};
+
+    function showToast(msg, kind = "info") {
+      toast.classList.remove("hidden");
+      toast.textContent = msg;
+      toast.classList.remove("border-red-400/30", "bg-red-500/10", "border-white/10", "bg-white/5", "border-emerald-400/30", "bg-emerald-500/10");
+      if (kind === "error") toast.classList.add("border-red-400/30", "bg-red-500/10");
+      else if (kind === "success") toast.classList.add("border-emerald-400/30", "bg-emerald-500/10");
+      else toast.classList.add("border-white/10", "bg-white/5");
+    }
+
+    function setSelectedFiles(fileList) {
+      const files = Array.from(fileList || []);
+      if (files.length === 0) {
+        filenameEl.classList.add("hidden");
+        filenameEl.textContent = "";
+        return;
+      }
+      if (files.length > MAX_FILES) {
+        showToast(`Max ${MAX_FILES} files per batch.`, "error");
+        const dt = new DataTransfer();
+        files.slice(0, MAX_FILES).forEach(f => dt.items.add(f));
+        fileInput.files = dt.files;
+        return setSelectedFiles(fileInput.files);
+      }
+
+      filenameEl.classList.remove("hidden");
+      const names = files.map(f => f.name);
+      filenameEl.textContent = `Selected ${files.length}: ${names.slice(0,3).join(", ")}${names.length>3 ? "…" : ""}`;
+    }
+
+    dropzone.addEventListener("click", () => fileInput.click());
+    fileInput.addEventListener("change", (e) => setSelectedFiles(e.target.files));
+
+    ["dragenter","dragover"].forEach(evt =>
+      dropzone.addEventListener(evt, (e) => {
+        e.preventDefault(); e.stopPropagation();
+        dropzone.classList.add("bg-white/10");
+      })
+    );
+    ["dragleave","drop"].forEach(evt =>
+      dropzone.addEventListener(evt, (e) => {
+        e.preventDefault(); e.stopPropagation();
+        dropzone.classList.remove("bg-white/10");
+      })
+    );
+
+    dropzone.addEventListener("drop", (e) => {
+      const files = e.dataTransfer.files;
+      if (files && files.length) {
+        fileInput.files = files;
+        setSelectedFiles(files);
+      }
+    });
+
+    function filenameFromDisposition(disposition, fallback) {
+      if (!disposition) return fallback;
+      const match = /filename="?([^";]+)"?/i.exec(disposition);
+      return match ? match[1] : fallback;
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const files = Array.from(fileInput.files || []);
+      const format = document.getElementById("format").value;
+      const quality = document.getElementById("quality").value;
+
+      if (files.length === 0) return showToast("Pick at least one HEIC/HEIF file.", "error");
+      if (files.length > MAX_FILES) return showToast(`Max ${MAX_FILES} files.`, "error");
+
+      btn.disabled = true;
+      btn.textContent = "Converting…";
+      showToast("Uploading and converting…");
+
+      try {
+        const data = new FormData();
+        files.forEach(f => data.append("files", f));
+        data.append("format", format);
+        data.append("quality", quality);
+
+        const res = await fetch("/convert", { method: "POST", body: data });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.error || "Conversion failed.");
+        }
+
+        const blob = await res.blob();
+        const cd = res.headers.get("Content-Disposition");
+        const fallback = (files.length === 1) ? `converted.${format}` : "converted.zip";
+        const outName = filenameFromDisposition(cd, fallback);
+
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = outName;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+
+        showToast("Done. Download should start automatically.", "success");
+        afterConvertAd.classList.remove("hidden");
+        if (window.adsbygoogle && afterConvertAd.querySelector("ins.adsbygoogle")) {
+          try { (adsbygoogle = window.adsbygoogle || []).push({}); } catch (e) {}
+        }
+      } catch (err) {
+        showToast(err.message || "Something went wrong.", "error");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Convert now";
+      }
+    });
+  </script>
+{% endblock %}

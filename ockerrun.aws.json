@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "Image": {
+    "Name": "heic-saas:latest",
+    "Update": "true"
+  },
+  "Ports": [
+    {
+      "ContainerPort": 8000
+    }
+  ]
+}

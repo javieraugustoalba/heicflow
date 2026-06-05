@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="max-w-3xl">
+  <h1 class="text-3xl font-bold">Contact</h1>
+  <p class="mt-3 text-white/75 leading-7">Need help with HEIC conversion, business plans or support?</p>
+  <div class="mt-6 rounded-2xl border border-white/10 bg-white/5 p-6">
+    {% if contact_email %}
+      <p class="text-white/75">Email: <a class="text-indigo-200 hover:text-white" href="mailto:{{ contact_email }}">{{ contact_email }}</a></p>
+    {% else %}
+      <p class="text-white/75">Set CONTACT_EMAIL in your environment variables before production.</p>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

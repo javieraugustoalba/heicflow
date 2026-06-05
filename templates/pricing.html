@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% set title = "Pricing" %}
+
+{% block content %}
+<div class="flex items-start justify-between gap-4 flex-col sm:flex-row">
+  <div>
+    <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">Pricing</h1>
+    <p class="mt-2 text-white/70">
+      Start free with standard quality and ads. Upgrade for high-quality conversion, larger batches and no ads.
+    </p>
+  </div>
+</div>
+
+{% if error %}
+<div class="mt-6 rounded-xl border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm text-white/80">
+  {{ error }}
+</div>
+{% endif %}
+
+<div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-5">
+  <div class="rounded-2xl border border-white/10 bg-white/5 p-6">
+    <div class="text-sm text-white/60">Guest</div>
+    <div class="mt-1 text-3xl font-bold">Free</div>
+    <div class="mt-2 text-white/70 text-sm">Best for quick daily conversions.</div>
+
+    <ul class="mt-5 space-y-2 text-sm text-white/70">
+      <li>• Standard quality</li>
+      <li>• Free daily guest limit</li>
+      <li>• Ads supported</li>
+      <li>• No login required</li>
+    </ul>
+
+    <a href="/"
+      class="mt-6 inline-flex w-full justify-center rounded-xl bg-white/10 hover:bg-white/15 px-4 py-3 font-semibold">
+      Convert free
+    </a>
+  </div>
+
+  <div class="rounded-2xl border border-white/10 bg-white/5 p-6">
+    <div class="text-sm text-white/60">Free account</div>
+    <div class="mt-1 text-3xl font-bold">0</div>
+    <div class="mt-2 text-white/70 text-sm">More monthly conversions with account tracking.</div>
+
+    <ul class="mt-5 space-y-2 text-sm text-white/70">
+      <li>• {{ free_quota }} credits / month</li>
+      <li>• Standard quality</li>
+      <li>• Ads supported</li>
+      <li>• Google login</li>
+    </ul>
+
+    <a href="/login"
+      class="mt-6 inline-flex w-full justify-center rounded-xl bg-indigo-500 hover:bg-indigo-400 px-4 py-3 font-semibold">
+      Create free account
+    </a>
+  </div>
+
+  {% for p in plans %}
+  <div class="rounded-2xl border border-indigo-300/20 bg-indigo-400/10 p-6">
+    <div class="text-sm text-indigo-100">{{ p.name }}</div>
+    <div class="mt-1 text-3xl font-bold">{{ p.monthly_label or "Monthly" }}</div>
+    <div class="mt-2 text-white/70 text-sm">{{ p.monthly_quota }} credits / month</div>
+
+    <ul class="mt-5 space-y-2 text-sm text-white/70">
+      <li>• High and maximum quality</li>
+      <li>• No ads</li>
+      <li>• Larger batches</li>
+      <li>• ZIP downloads</li>
+      <li>• Better for professional work</li>
+    </ul>
+
+    {% if user and user.is_authenticated %}
+
+      {% if p.epayco_plan_code %}
+      <button
+        class="mt-6 inline-flex w-full justify-center rounded-xl bg-emerald-500 hover:bg-emerald-400 px-4 py-3 font-semibold"
+        onclick="buyWithEpayco('{{ p.epayco_plan_code }}')">
+        Pay in Colombia (ePayco)
+      </button>
+
+      {% if p.epayco_amount_cop %}
+      <div class="mt-2 text-xs text-white/55">
+        Colombia price: {{ "{:,.0f}".format(p.epayco_amount_cop).replace(",", ".") }} COP / month
+      </div>
+      {% endif %}
+      {% endif %}
+
+      <button
+        class="mt-3 inline-flex w-full justify-center rounded-xl bg-indigo-500 hover:bg-indigo-400 px-4 py-3 font-semibold"
+        onclick="buyPlan('{{ p.price_id }}')">
+        Pay worldwide (Paddle)
+      </button>
+
+    {% else %}
+      <a href="/login"
+        class="mt-6 inline-flex w-full justify-center rounded-xl bg-indigo-500 hover:bg-indigo-400 px-4 py-3 font-semibold">
+        Login to buy
+      </a>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+
+<script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
+<script>
+  const PADDLE_TOKEN = "{{ paddle_client_token }}";
+
+  function showMsg(msg) { alert(msg); }
+
+  if (PADDLE_TOKEN) {
+    Paddle.Initialize({ token: PADDLE_TOKEN });
+  }
+
+  async function buyPlan(priceId) {
+    if (!PADDLE_TOKEN) {
+      showMsg("Paddle is not configured. Set PADDLE_CLIENT_TOKEN.");
+      return;
+    }
+
+    const res = await fetch("/api/billing/create-checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ price_id: priceId })
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      showMsg(data.error || "Could not start checkout.");
+      return;
+    }
+
+    Paddle.Checkout.open({ transactionId: data.transaction_id });
+  }
+</script>
+
+<script src="https://checkout.epayco.co/checkout-v2.js"></script>
+<script>
+  async function buyWithEpayco(planCode) {
+    const res = await fetch("/api/billing/epayco/create-session", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({ plan_code: planCode })
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) return alert(data.error || "No se pudo iniciar ePayco (sin detalle).");
+
+    const checkout = ePayco.checkout.configure({
+      sessionId: data.sessionId,
+      type: "standard",
+      test: !!data.test
+    });
+    checkout.open();
+  }
+</script>
+
+{% endblock %}
