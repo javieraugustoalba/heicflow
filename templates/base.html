@@ -1,88 +1,61 @@
 <!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ title or "Convert HEIC to JPG Online Free" }} | {{ app_name }}</title>
+    <meta name="description" content="Convert HEIC and HEIF photos to JPG, PNG or WEBP online. Fast, private, no installation required. Free standard conversion with Pro high-quality options." />
+    <link rel="canonical" href="{{ public_base_url or request.url_root.rstrip('/') }}{{ request.path }}" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    {% if adsense_client %}
+      <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ adsense_client }}" crossorigin="anonymous"></script>
+    {% endif %}
+  </head>
 
-<head>
-  {% if config.ADSENSE_CLIENT %}
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ config.ADSENSE_CLIENT }}"
-    crossorigin="anonymous"></script>
-  {% endif %}
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{{ title or "Convert HEIC to JPG Online Free" }} | {{ app_name }}</title>
-  <meta name="description"
-    content="Convert HEIC and HEIF photos to JPG, PNG or WEBP online. Fast, private, no installation required. Free standard conversion with Pro high-quality options." />
-  <link rel="canonical" href="{{ public_base_url or request.url_root.rstrip('/') }}{{ request.path }}" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  {% if adsense_client %}
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ adsense_client }}"
-    crossorigin="anonymous"></script>
-  {% endif %}
-</head>
-
-<body class="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-white">
-  <header class="border-b border-white/10 bg-black/10 backdrop-blur sticky top-0 z-30">
-    <div class="mx-auto max-w-6xl px-4 py-4 flex items-center justify-between gap-3">
-      <a href="/" class="font-bold tracking-tight text-lg">
-        {{ app_name.replace('Flow', '') }}<span class="text-indigo-300">Flow</span>
-      </a>
-
-      <nav class="flex items-center gap-2 sm:gap-3">
-        <a href="/heic-to-jpg" class="hidden sm:inline text-sm text-white/80 hover:text-white">HEIC to JPG</a>
-        <a href="/heic-to-png" class="hidden sm:inline text-sm text-white/80 hover:text-white">HEIC to PNG</a>
-        <a href="/pricing" class="text-sm text-white/80 hover:text-white">Pricing</a>
-
-        {% if user and user.is_authenticated %}
-        <a href="/account" class="text-sm text-white/80 hover:text-white">Account</a>
-        <form method="post" action="/logout" class="inline">
-          <button class="text-sm rounded-lg bg-white/10 hover:bg-white/15 px-3 py-1.5">
-            Logout
-          </button>
-        </form>
-        {% else %}
-        <a href="/login" class="text-sm rounded-lg bg-indigo-500 hover:bg-indigo-400 px-3 py-1.5 font-semibold">
-          Free account
+  <body class="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-white">
+    <header class="border-b border-white/10 bg-black/10 backdrop-blur sticky top-0 z-30">
+      <div class="mx-auto max-w-6xl px-4 py-4 flex items-center justify-between gap-3">
+        <a href="/" class="font-bold tracking-tight text-lg">
+          {{ app_name.replace('Flow', '') }}<span class="text-indigo-300">Flow</span>
         </a>
-        {% endif %}
-      </nav>
-    </div>
-  </header>
 
-  <main class="mx-auto max-w-6xl px-4 py-8">
-    {% block content %}{% endblock %}
-  </main>
-  {% if config.ADSENSE_CLIENT and config.ADSENSE_SLOT_TOP %}
-  <div class="ad-container">
-    <ins class="adsbygoogle" style="display:block" data-ad-client="{{ config.ADSENSE_CLIENT }}"
-      data-ad-slot="{{ config.ADSENSE_SLOT_TOP }}" data-ad-format="auto" data-full-width-responsive="true"></ins>
-    <script>
-      (adsbygoogle = window.adsbygoogle || []).push({});
-    </script>
-  </div>
-  {% endif %}
-  {% if config.ADSENSE_CLIENT and config.ADSENSE_SLOT_AFTER_CONVERT %}
-  <div class="ad-container">
-    <ins class="adsbygoogle" style="display:block" data-ad-client="{{ config.ADSENSE_CLIENT }}"
-      data-ad-slot="{{ config.ADSENSE_SLOT_AFTER_CONVERT }}" data-ad-format="auto"
-      data-full-width-responsive="true"></ins>
-    <script>
-      (adsbygoogle = window.adsbygoogle || []).push({});
-    </script>
-  </div>
-  {% endif %}
-  <footer class="mx-auto max-w-6xl px-4 pb-8 text-xs text-white/50">
-    <div class="border-t border-white/10 pt-5 grid gap-3 sm:grid-cols-2">
-      <div>
-        {{ app_name }} converts your photos temporarily for download. We do not intentionally store or save uploaded images
-        after conversion.
-      </div>
-      <div class="sm:text-right space-x-3">
-        <a href="/privacy" class="hover:text-white">Privacy</a>
-        <a href="/terms" class="hover:text-white">Terms</a>
-        <a href="/contact" class="hover:text-white">Contact</a>
-        <a href="/about" class="hover:text-white">About</a>
-      </div>
-    </div>
-  </footer>
-</body>
+        <nav class="flex items-center gap-2 sm:gap-3">
+          <a href="/heic-to-jpg" class="hidden sm:inline text-sm text-white/80 hover:text-white">HEIC to JPG</a>
+          <a href="/heic-to-png" class="hidden sm:inline text-sm text-white/80 hover:text-white">HEIC to PNG</a>
+          <a href="/pricing" class="text-sm text-white/80 hover:text-white">Pricing</a>
 
+          {% if user and user.is_authenticated %}
+            <a href="/account" class="text-sm text-white/80 hover:text-white">Account</a>
+            <form method="post" action="/logout" class="inline">
+              <button class="text-sm rounded-lg bg-white/10 hover:bg-white/15 px-3 py-1.5">
+                Logout
+              </button>
+            </form>
+          {% else %}
+            <a href="/login" class="text-sm rounded-lg bg-indigo-500 hover:bg-indigo-400 px-3 py-1.5 font-semibold">
+              Free account
+            </a>
+          {% endif %}
+        </nav>
+      </div>
+    </header>
+
+    <main class="mx-auto max-w-6xl px-4 py-8">
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer class="mx-auto max-w-6xl px-4 pb-8 text-xs text-white/50">
+      <div class="border-t border-white/10 pt-5 grid gap-3 sm:grid-cols-2">
+        <div>
+          {{ app_name }} converts your photos temporarily for download. We do not intentionally store uploaded images after conversion.
+        </div>
+        <div class="sm:text-right space-x-3">
+          <a href="/privacy" class="hover:text-white">Privacy</a>
+          <a href="/terms" class="hover:text-white">Terms</a>
+          <a href="/contact" class="hover:text-white">Contact</a>
+          <a href="/about" class="hover:text-white">About</a>
+        </div>
+      </div>
+    </footer>
+  </body>
 </html>
