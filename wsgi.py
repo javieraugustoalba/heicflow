@@ -1,4 +1,3 @@
-from app import app
+from app import create_app
 
-# Gunicorn entrypoint:
-# gunicorn -b 0.0.0.0:8000 wsgi:app
+app = create_app()

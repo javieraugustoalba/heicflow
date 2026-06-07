@@ -56,7 +56,7 @@ def _find_plan_by_code(plan_code: str) -> Optional[Dict[str, Any]]:
 
 
 def _grant_credits(user_id: str, plan_code: str, quota: int, amount: int, currency: str, ref_payco: str, tx_id: str):
-    # Idempotencia: si ya procesamos esta transacción, no hacemos nada
+    # Idempotencia: si ya procesamos esta transacción, no hacemos nada.
     existing = Payment.query.filter_by(provider="epayco", provider_transaction_id=tx_id).first()
     if existing:
         return
@@ -74,18 +74,29 @@ def _grant_credits(user_id: str, plan_code: str, quota: int, amount: int, curren
     )
     db.session.add(pay)
 
-    # “Mensual” simple: 30 días desde la compra.
-    # Si el usuario ya tiene un pack activo, lo encadenamos para no perder tiempo.
+    # Mensual simple: 30 días.
+    # Importante: NO encadenamos detrás del periodo Free mensual, porque si no
+    # el usuario paga hoy pero ve el plan activo solo después de que termine Free.
+    # Regla MVP:
+    # - Si no hay plan pago activo: activa el nuevo plan inmediatamente.
+    # - Si hay plan pago activo y el nuevo plan es mayor: upgrade inmediato.
+    # - Si hay plan pago activo igual/menor: lo encadenamos al final del pago activo.
     now = datetime.utcnow().replace(microsecond=0)
-    last = (
+    free_quota = int(current_app.config.get("FREE_MONTHLY_QUOTA", 50))
+    new_quota = int(quota)
+
+    active_paid = (
         UsagePeriod.query.filter_by(user_id=user_id)
-        .order_by(UsagePeriod.period_end.desc())
+        .filter(UsagePeriod.quota > free_quota)
+        .filter(UsagePeriod.period_start <= now, UsagePeriod.period_end > now)
+        .order_by(UsagePeriod.quota.desc(), UsagePeriod.period_end.desc())
         .first()
     )
 
-    start = now
-    if last and last.period_end and last.period_end > start:
-        start = last.period_end
+    if active_paid and new_quota <= int(active_paid.quota):
+        start = active_paid.period_end.replace(microsecond=0)
+    else:
+        start = now
 
     end = (start + timedelta(days=30)).replace(microsecond=0)
 
@@ -93,7 +104,7 @@ def _grant_credits(user_id: str, plan_code: str, quota: int, amount: int, curren
         user_id=user_id,
         period_start=start,
         period_end=end,
-        quota=int(quota),
+        quota=new_quota,
         used=0,
     )
     db.session.add(usage)
@@ -150,10 +161,15 @@ def create_session():
         "response": f"{base}/payment/epayco/response",
         "confirmation": f"{base}/webhooks/epayco/confirmation",
         "method": "POST",
+        # ePayco puede devolver los extras como x_extra1/x_extra2/x_extra3.
+        # Los enviamos directos y anidados para mayor compatibilidad entre checkouts.
+        "extra1": current_user.id,      # user_id
+        "extra2": plan_code,            # plan_code
+        "extra3": str(quota),           # quota
         "extras": {
-            "extra1": current_user.id,      # user_id
-            "extra2": plan_code,            # plan_code
-            "extra3": str(quota),           # quota
+            "extra1": current_user.id,
+            "extra2": plan_code,
+            "extra3": str(quota),
         },
         "billing": {
             "email": current_user.email,
