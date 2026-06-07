@@ -6,7 +6,7 @@ import uuid
 from datetime import date, datetime
 
 from dotenv import load_dotenv
-from flask import Flask, g, jsonify, make_response, render_template, request, send_file
+from flask import Response, current_app, Flask, g, jsonify, make_response, render_template, request, send_file
 from flask_login import current_user, login_required
 from werkzeug.middleware.proxy_fix import ProxyFix
 
@@ -534,8 +534,18 @@ def create_app():
             download_name="converted.zip",
             max_age=0,
         )
+    @app.get("/ads.txt")
+    def ads_txt():
+        adsense_client = current_app.config.get("ADSENSE_CLIENT", "").strip()
 
-    return app
+        if not adsense_client:
+            return Response("", mimetype="text/plain")
+
+        publisher_id = adsense_client.replace("ca-", "")
+
+        content = f"google.com, {publisher_id}, DIRECT, f08c47fec0942fa0\n"
+        return Response(content, mimetype="text/plain")
+        return app
 
 
 app = create_app()
