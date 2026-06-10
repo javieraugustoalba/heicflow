@@ -45,7 +45,7 @@ $ExcludedFiles = @(
     "*.bak"
 )
 
-function Is-ExcludedPath {
+function Test-ExcludedPath {
     param([string]$FullPath)
 
     $relative = Resolve-Path -LiteralPath $FullPath | ForEach-Object {
@@ -70,7 +70,7 @@ function Is-ExcludedPath {
 Write-Host "Copying clean project files..." -ForegroundColor Cyan
 
 Get-ChildItem -Path $ProjectRoot -Recurse -File | ForEach-Object {
-    if (Is-ExcludedPath $_.FullName) {
+    if (Test-ExcludedPath $_.FullName) {
         return
     }
 
