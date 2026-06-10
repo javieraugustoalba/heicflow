@@ -4,7 +4,7 @@
 <head>
   {% set site_base_url = public_base_url or request.url_root.rstrip('/') %}
   {% set canonical_url = site_base_url ~ request.path %}
-  {% set og_image_url = site_base_url ~ url_for('static', filename='img/og-heicflow.png') %}
+  {% set  = site_base_url ~ url_for('static', filename='img/og-heicflow.png') %}
 
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -29,19 +29,29 @@
   <meta property="og:description"
     content="Convert HEIC and HEIF photos to JPG, PNG or WEBP online. Fast, private, no installation required. Free standard conversion with Pro options." />
   <meta property="og:url" content="{{ canonical_url }}" />
-  <meta property="og:image" content="{{ og_image_url }}" />
-  <meta property="og:image:secure_url" content="{{ og_image_url }}" />
+  <meta property="og:image" content="https://useheicflow.com/static/img/og-heicflow.png">
+  <meta property="og:image:secure_url" content="{{  }}" />
   <meta property="og:image:type" content="image/png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="627" />
   <meta property="og:locale" content="en_US" />
+  <meta name="author" content="Javier Augusto Alba Tamayo" />
+  <meta name="publisher" content="HEICFlow" />
+
+  <!-- Article metadata for LinkedIn/Post Inspector -->
+  <meta property="article:author" content="Javier Augusto Alba Tamayo" />
+  <meta property="article:published_time" content="2026-06-09T00:00:00Z" />
+  <meta property="article:modified_time" content="2026-06-09T00:00:00Z" />
+
+  <!-- Optional fallback used by some scrapers -->
+  <meta property="og:publish_date" content="2026-06-09T00:00:00Z" />
 
   <!-- Twitter / X Preview -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="HEICFlow - Convert HEIC to JPG, PNG or WEBP online" />
   <meta name="twitter:description"
     content="Convert HEIC and HEIF photos to JPG, PNG or WEBP online. Fast, private, no installation required." />
-  <meta name="twitter:image" content="{{ og_image_url }}" />
+  <meta name="twitter:image" content="{{  }}" />
 
   <script src="https://cdn.tailwindcss.com"></script>
 
