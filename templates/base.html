@@ -1,115 +1,124 @@
 <!doctype html>
 <html lang="en">
+  <head>
+    {% set site_base_url = public_base_url or request.url_root.rstrip('/') %}
+    {% set canonical_url = site_base_url ~ request.path %}
+    {% set og_image_url = site_base_url ~ url_for('static', filename='img/og-heicflow.png') %}
 
-<head>
-  {% set site_base_url = public_base_url or request.url_root.rstrip('/') %}
-  {% set canonical_url = site_base_url ~ request.path %}
-  {% set  = site_base_url ~ url_for('static', filename='img/og-heicflow.png') %}
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ title or "Convert HEIC to JPG, PNG or WEBP Online" }} | {{ app_name }}</title>
 
-  <title>{{ title or "Convert HEIC to JPG, PNG or WEBP Online" }} | {{ app_name }}</title>
+    <meta
+      name="description"
+      content="Convert HEIC and HEIF photos to JPG, PNG or WEBP online. Fast, private, no installation required. Free standard conversion with Pro high-quality options."
+    />
 
-  <meta name="description"
-    content="Convert HEIC and HEIF photos to JPG, PNG or WEBP online. Fast, private, no installation required. Free standard conversion with Pro high-quality options." />
+    <link rel="canonical" href="{{ canonical_url }}" />
 
-  <link rel="canonical" href="{{ canonical_url }}" />
+    <!-- Favicon / App Icons -->
+    <link rel="icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon-512.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/apple-touch-icon.png') }}">
+    <meta name="theme-color" content="#0f172a" />
 
-  <!-- Favicon / App Icons -->
-  <link rel="icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
-  <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon-512.png') }}">
-  <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/apple-touch-icon.png') }}">
-  <meta name="theme-color" content="#0f172a" />
+    <!-- Open Graph / LinkedIn / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="{{ app_name }}" />
+    <meta property="og:title" content="HEICFlow - Convert HEIC to JPG, PNG or WEBP online" />
+    <meta
+      property="og:description"
+      content="Convert HEIC and HEIF photos to JPG, PNG or WEBP online. Fast, private, no installation required. Free standard conversion with Pro options."
+    />
+    <meta property="og:url" content="{{ canonical_url }}" />
+    <meta property="og:image" content="{{ og_image_url }}" />
+    <meta property="og:image:secure_url" content="{{ og_image_url }}" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="627" />
+    <meta property="og:image:alt" content="HEICFlow - Convert HEIC to JPG, PNG or WEBP online" />
+    <meta property="og:locale" content="en_US" />
 
-  <!-- Open Graph / LinkedIn / Facebook -->
-  <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="{{ app_name }}" />
-  <meta property="og:title" content="HEICFlow - Convert HEIC to JPG, PNG or WEBP online" />
-  <meta property="og:description"
-    content="Convert HEIC and HEIF photos to JPG, PNG or WEBP online. Fast, private, no installation required. Free standard conversion with Pro options." />
-  <meta property="og:url" content="{{ canonical_url }}" />
-  <meta property="og:image" content="https://useheicflow.com/static/img/og-heicflow.png">
-  <meta property="og:image:secure_url" content="{{  }}" />
-  <meta property="og:image:type" content="image/png" />
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="627" />
-  <meta property="og:locale" content="en_US" />
-  <meta name="author" content="Javier Augusto Alba Tamayo" />
-  <meta name="publisher" content="HEICFlow" />
+    <!-- Author / Publisher metadata -->
+    <meta name="author" content="Javier Augusto Alba Tamayo" />
+    <meta name="publisher" content="HEICFlow" />
 
-  <!-- Article metadata for LinkedIn/Post Inspector -->
-  <meta property="article:author" content="Javier Augusto Alba Tamayo" />
-  <meta property="article:published_time" content="2026-06-09T00:00:00Z" />
-  <meta property="article:modified_time" content="2026-06-09T00:00:00Z" />
+    <!-- Optional article-style metadata for LinkedIn/Post Inspector -->
+    <meta property="article:author" content="Javier Augusto Alba Tamayo" />
+    <meta property="article:published_time" content="2026-06-09T00:00:00Z" />
+    <meta property="article:modified_time" content="2026-06-09T00:00:00Z" />
+    <meta property="og:publish_date" content="2026-06-09T00:00:00Z" />
 
-  <!-- Optional fallback used by some scrapers -->
-  <meta property="og:publish_date" content="2026-06-09T00:00:00Z" />
+    <!-- Twitter / X Preview -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="HEICFlow - Convert HEIC to JPG, PNG or WEBP online" />
+    <meta
+      name="twitter:description"
+      content="Convert HEIC and HEIF photos to JPG, PNG or WEBP online. Fast, private, no installation required."
+    />
+    <meta name="twitter:image" content="{{ og_image_url }}" />
 
-  <!-- Twitter / X Preview -->
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="HEICFlow - Convert HEIC to JPG, PNG or WEBP online" />
-  <meta name="twitter:description"
-    content="Convert HEIC and HEIF photos to JPG, PNG or WEBP online. Fast, private, no installation required." />
-  <meta name="twitter:image" content="{{  }}" />
+    <script src="https://cdn.tailwindcss.com"></script>
 
-  <script src="https://cdn.tailwindcss.com"></script>
+    {% if adsense_client %}
+      <script
+        async
+        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ adsense_client }}"
+        crossorigin="anonymous">
+      </script>
+    {% endif %}
+  </head>
 
-  {% if adsense_client %}
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ adsense_client }}"
-    crossorigin="anonymous">
-    </script>
-  {% endif %}
-</head>
-
-<body class="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-white">
-  <header class="border-b border-white/10 bg-black/10 backdrop-blur sticky top-0 z-30">
-    <div class="mx-auto max-w-6xl px-4 py-4 flex items-center justify-between gap-3">
-      <a href="/" class="font-bold tracking-tight text-lg flex items-center gap-2">
-        <img src="{{ url_for('static', filename='img/favicon-512.png') }}" alt="{{ app_name }} logo"
-          class="h-7 w-7 rounded-md" />
-        <span>{{ app_name.replace('Flow', '') }}<span class="text-indigo-300">Flow</span></span>
-      </a>
-
-      <nav class="flex items-center gap-2 sm:gap-3">
-        <a href="/heic-to-jpg" class="hidden sm:inline text-sm text-white/80 hover:text-white">HEIC to JPG</a>
-        <a href="/heic-to-png" class="hidden sm:inline text-sm text-white/80 hover:text-white">HEIC to PNG</a>
-        <a href="/pricing" class="text-sm text-white/80 hover:text-white">Pricing</a>
-
-        {% if user and user.is_authenticated %}
-        <a href="/account" class="text-sm text-white/80 hover:text-white">Account</a>
-        <form method="post" action="/logout" class="inline">
-          <button class="text-sm rounded-lg bg-white/10 hover:bg-white/15 px-3 py-1.5">
-            Logout
-          </button>
-        </form>
-        {% else %}
-        <a href="/login" class="text-sm rounded-lg bg-indigo-500 hover:bg-indigo-400 px-3 py-1.5 font-semibold">
-          Free account
+  <body class="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-white">
+    <header class="border-b border-white/10 bg-black/10 backdrop-blur sticky top-0 z-30">
+      <div class="mx-auto max-w-6xl px-4 py-4 flex items-center justify-between gap-3">
+        <a href="/" class="font-bold tracking-tight text-lg flex items-center gap-2">
+          <img
+            src="{{ url_for('static', filename='img/favicon-512.png') }}"
+            alt="{{ app_name }} logo"
+            class="h-7 w-7 rounded-md"
+          />
+          <span>{{ app_name.replace('Flow', '') }}<span class="text-indigo-300">Flow</span></span>
         </a>
-        {% endif %}
-      </nav>
-    </div>
-  </header>
 
-  <main class="mx-auto max-w-6xl px-4 py-8">
-    {% block content %}{% endblock %}
-  </main>
+        <nav class="flex items-center gap-2 sm:gap-3">
+          <a href="/heic-to-jpg" class="hidden sm:inline text-sm text-white/80 hover:text-white">HEIC to JPG</a>
+          <a href="/heic-to-png" class="hidden sm:inline text-sm text-white/80 hover:text-white">HEIC to PNG</a>
+          <a href="/pricing" class="text-sm text-white/80 hover:text-white">Pricing</a>
 
-  <footer class="mx-auto max-w-6xl px-4 pb-8 text-xs text-white/50">
-    <div class="border-t border-white/10 pt-5 grid gap-3 sm:grid-cols-2">
-      <div>
-        {{ app_name }} converts your photos temporarily for download. We do not intentionally store images after
-        conversion.
+          {% if user and user.is_authenticated %}
+            <a href="/account" class="text-sm text-white/80 hover:text-white">Account</a>
+            <form method="post" action="/logout" class="inline">
+              <button class="text-sm rounded-lg bg-white/10 hover:bg-white/15 px-3 py-1.5">
+                Logout
+              </button>
+            </form>
+          {% else %}
+            <a href="/login" class="text-sm rounded-lg bg-indigo-500 hover:bg-indigo-400 px-3 py-1.5 font-semibold">
+              Free account
+            </a>
+          {% endif %}
+        </nav>
       </div>
-      <div class="sm:text-right space-x-3">
-        <a href="/privacy" class="hover:text-white">Privacy</a>
-        <a href="/terms" class="hover:text-white">Terms</a>
-        <a href="/contact" class="hover:text-white">Contact</a>
-        <a href="/about" class="hover:text-white">About</a>
-      </div>
-    </div>
-  </footer>
-</body>
+    </header>
 
+    <main class="mx-auto max-w-6xl px-4 py-8">
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer class="mx-auto max-w-6xl px-4 pb-8 text-xs text-white/50">
+      <div class="border-t border-white/10 pt-5 grid gap-3 sm:grid-cols-2">
+        <div>
+          {{ app_name }} converts your photos temporarily for download. We do not intentionally store images after conversion.
+        </div>
+        <div class="sm:text-right space-x-3">
+          <a href="/privacy" class="hover:text-white">Privacy</a>
+          <a href="/terms" class="hover:text-white">Terms</a>
+          <a href="/contact" class="hover:text-white">Contact</a>
+          <a href="/about" class="hover:text-white">About</a>
+        </div>
+      </div>
+    </footer>
+  </body>
 </html>
